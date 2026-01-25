@@ -181,3 +181,267 @@ namespace ASG_pt1
         }
     }
 }
+namespace S10273431_PRG2Assignment
+{
+    internal class Menu
+    {
+		private string menuId;
+
+		public string MenuId
+		{
+			get { return menuId; }
+			set { menuId = value; }
+		}
+		private string menuName;
+
+		public string MenuName
+		{
+			get { return menuName; }
+			set { menuName = value; }
+		}
+		// default constructor
+		public Menu()
+		{
+        }
+        // parameterized constructor
+		public Menu(string menuId, string menuName)
+		{
+			this.menuId = menuId;
+			this.menuName = menuName;
+        }
+		// method to add food item
+		public void AddFoodItem(FoodItem foodItem)
+		{
+
+		}
+    }
+}
+namespace S10273431_PRG2Assignment
+{
+    internal class Restaurant: Menu
+    {
+		private string restaurantId;
+
+		public string RestaurantId
+		{
+			get { return restaurantId; }
+			set { restaurantId = value; }
+		}
+		private string restaurantName;
+
+		public string RestaurantName
+		{
+			get { return restaurantName; }
+			set { restaurantName = value; }
+		}
+		private string restaurantEmail;
+
+		public string RestaurantEmail
+        {
+			get { return restaurantEmail; }
+			set { restaurantEmail = value; }
+		}
+		// default constructor
+		public Restaurant()
+		{
+        }
+        // parameterized constructor
+		public Restaurant(string restaurantId, string restaurantName, string restaurantEmail)
+		{
+			this.restaurantId = restaurantId;
+			this.restaurantName = restaurantName;
+			this.restaurantEmail = restaurantEmail;
+        }
+		// method to display orders
+		public void DisplayOrders()
+		{
+
+		}
+        // method to display special offers
+		public void DisplaySpecialOffers()
+		{
+        }
+		// method to display menu
+		public void DisplayMenu()
+		{
+
+		}
+		// method to add menu 
+		public void AddMenu(Menu menu)
+		{
+			
+		}
+        // method to remove menu
+		public void RemoveMenu(Menu menu)
+		{
+
+		}
+		public override string ToString()
+		{
+			return "Restaurant ID: " + restaurantId + "\nRestaurant Name: " + restaurantName + "\nRestaurant Email: " + restaurantEmail;
+        }
+    }
+}
+
+namespace S10273431_PRG2Assignment
+{
+    internal class SpecialOffer
+    {
+		private string offerCode;
+
+		public string OfferCode
+		{
+			get { return offerCode; }
+			set { offerCode = value; }
+		}
+		private string offerDesc;
+
+		public string OfferDesc
+		{
+			get { return offerDesc; }
+			set { offerDesc = value; }
+		}
+		private double discount;
+
+		public double Discount
+		{
+			get { return discount; }
+			set { discount = value; }
+		}
+		// default constructor
+		public SpecialOffer()
+		{
+		}
+		// parameterized constructor
+		public SpecialOffer(string offerCode, string offerDesc, double discount)
+		{
+			this.offerCode = offerCode;
+			this.offerDesc = offerDesc;
+			this.discount = discount;
+		}
+		public override string ToString()
+		{
+			return "Offer Code: " + offerCode + "\nOffer Description: " + offerDesc + "\nDiscount: " + discount;
+        }
+    }
+}
+namespace S10273431_PRG2Assignment
+{
+    internal class Order
+    {
+        private List<OrderedFoodItem> orderedFoodItemList;
+
+        private int orderId;
+
+		public int OrderID
+		{
+			get { return orderId; }
+			set { orderId = value; }
+		}
+		private DateTime orderDateTime;
+
+		public DateTime OrderDateTime
+		{
+			get { return orderDateTime; }
+			set { orderDateTime = value; }
+		}
+		private double orderTotal;
+
+		public double OrderTotal
+		{
+			get { return orderTotal; }
+			set { orderTotal = value; }
+		}
+		private string orderStatus;
+
+		public string OrderStatus
+		{
+			get { return orderStatus; }
+			set { orderStatus = value; }
+		}
+		private DateTime deliveryDateTime;
+
+		public DateTime DeliveryDateTime
+        {
+			get { return deliveryDateTime; }
+			set { deliveryDateTime = value; }
+		}
+		private string deliveryAddress;
+
+		public string DeliveryAddress
+		{
+			get { return deliveryAddress; }
+			set { deliveryAddress = value; }
+		}
+		private string orderPaymentMethod;
+
+		public string OrderPaymentMethod
+		{
+			get { return orderPaymentMethod; }
+			set { orderPaymentMethod = value; }
+		}
+		private bool orderPaid;
+
+		public bool OrderPaid
+		{
+			get { return orderPaid; }
+			set { orderPaid = value; }
+		}
+		// default constructor
+		public Order() 
+		{
+			orderedFoodItemList = new List<OrderedFoodItem>();
+        }
+        // parameterized constructor
+        public Order(int orderId, DateTime orderDateTime, double orderTotal, string orderStatus,
+                     DateTime deliveryDateTime, string deliveryAddress, string orderPaymentMethod, bool orderPaid)
+        {
+            this.orderId = orderId;
+            this.orderDateTime = orderDateTime;
+            this.orderTotal = orderTotal;
+            this.orderStatus = orderStatus;
+            this.deliveryDateTime = deliveryDateTime;
+            this.deliveryAddress = deliveryAddress;
+            this.orderPaymentMethod = orderPaymentMethod;
+            this.orderPaid = orderPaid;
+			orderedFoodItemList = new List<OrderedFoodItem>();
+        }
+        // method to calculate order total
+        public double CalculateOrderTotal()
+		{
+			double total = 0.0;
+			foreach (OrderedFoodItem item in orderedFoodItemList)
+			{
+				total += item.SubTotal;
+            }
+			orderTotal = total;
+			return total;
+        }
+        // method to add ordered food item
+        public void AddOrderedFoodItem(OrderedFoodItem item)
+        {
+            orderedFoodItemList.Add(item);
+        }
+		// method to remove ordered food item
+		public bool RemoveOrderedFoodItem(OrderedFoodItem item)
+		{
+			return orderedFoodItemList.Remove(item);
+        }
+        // method to display ordered food items
+        public void DisplayOrderedFoodItems()
+        {
+            foreach (OrderedFoodItem item in orderedFoodItemList)
+            {
+                Console.WriteLine(item);
+            }
+        }
+        public override string ToString()
+		{
+			return "Order ID: " + orderId + "Order DateTime: " + orderDateTime + "Order Total: " + orderTotal +
+				   "Order Status: " + orderStatus + "Delivery DateTime: " + deliveryDateTime +
+				   "Delivery Address: " + deliveryAddress + "Order Payment Method: " + orderPaymentMethod +
+				   "Order Paid: " + orderPaid;
+        }
+    }
+}
+
