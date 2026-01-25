@@ -183,42 +183,7 @@ namespace ASG_pt1
 }
 namespace S10273431_PRG2Assignment
 {
-    internal class Menu
-    {
-		private string menuId;
-
-		public string MenuId
-		{
-			get { return menuId; }
-			set { menuId = value; }
-		}
-		private string menuName;
-
-		public string MenuName
-		{
-			get { return menuName; }
-			set { menuName = value; }
-		}
-		// default constructor
-		public Menu()
-		{
-        }
-        // parameterized constructor
-		public Menu(string menuId, string menuName)
-		{
-			this.menuId = menuId;
-			this.menuName = menuName;
-        }
-		// method to add food item
-		public void AddFoodItem(FoodItem foodItem)
-		{
-
-		}
-    }
-}
-namespace S10273431_PRG2Assignment
-{
-    internal class Restaurant: Menu
+    internal class Restaurant
     {
 		private string restaurantId;
 
@@ -241,9 +206,17 @@ namespace S10273431_PRG2Assignment
 			get { return restaurantEmail; }
 			set { restaurantEmail = value; }
 		}
-		// default constructor
-		public Restaurant()
+        // list to hold menus and special offers
+		private List<Menu> menuList = new List<Menu>();
+		private List<SpecialOffer> specialOfferList = new List<SpecialOffer>();
+		private List<Order> orderList = new List<Order>();
+
+        // default constructor
+        public Restaurant()
 		{
+			menuList = new List<Menu>();
+			specialOfferList = new List<SpecialOffer>();
+			orderList = new List<Order>();
         }
         // parameterized constructor
 		public Restaurant(string restaurantId, string restaurantName, string restaurantEmail)
@@ -251,38 +224,61 @@ namespace S10273431_PRG2Assignment
 			this.restaurantId = restaurantId;
 			this.restaurantName = restaurantName;
 			this.restaurantEmail = restaurantEmail;
+
+			menuList = new List<Menu>();
+			specialOfferList = new List<SpecialOffer>();
+			orderList = new List<Order>();
         }
 		// method to display orders
 		public void DisplayOrders()
 		{
-
-		}
+			Console.WriteLine("Orders for " + restaurantName);
+			if (orderList.Count == 0)
+			{
+				Console.WriteLine("No orders yet.");
+				return;
+            }
+			foreach (Order order in orderList)
+			{
+				Console.WriteLine(order);
+				Console.WriteLine("Ordered Items:");
+				order.DisplayOrderedFoodItems();
+            }
+        }
         // method to display special offers
 		public void DisplaySpecialOffers()
 		{
+			Console.WriteLine("Special Offers for " + restaurantName);
+			foreach (SpecialOffer offer in specialOfferList)
+			{
+				Console.WriteLine(offer);
+            }
         }
 		// method to display menu
 		public void DisplayMenu()
 		{
-
-		}
+			Console.WriteLine("Menus for " + restaurantName);
+			foreach (Menu menu in menuList)
+			{
+				menu.DisplayFoodItems();
+            }
+        }
 		// method to add menu 
 		public void AddMenu(Menu menu)
 		{
-			
-		}
+			menuList.Add(menu);
+        }
         // method to remove menu
 		public void RemoveMenu(Menu menu)
 		{
-
-		}
+			menuList.Remove(menu);
+        }
 		public override string ToString()
 		{
 			return "Restaurant ID: " + restaurantId + "\nRestaurant Name: " + restaurantName + "\nRestaurant Email: " + restaurantEmail;
         }
     }
 }
-
 namespace S10273431_PRG2Assignment
 {
     internal class SpecialOffer
@@ -322,6 +318,65 @@ namespace S10273431_PRG2Assignment
 		public override string ToString()
 		{
 			return "Offer Code: " + offerCode + "\nOffer Description: " + offerDesc + "\nDiscount: " + discount;
+        }
+    }
+}
+namespace S10273431_PRG2Assignment
+{
+    internal class Menu
+    {
+		private string menuId;
+
+		public string MenuId
+		{
+			get { return menuId; }
+			set { menuId = value; }
+		}
+		private string menuName;
+
+		public string MenuName
+		{
+			get { return menuName; }
+			set { menuName = value; }
+		}
+        // list to hold food items
+		private List<FoodItem> foodItemList = new List<FoodItem>();
+
+        // default constructor
+        public Menu()
+		{
+			foodItemList = new List<FoodItem>();
+        }
+        // parameterized constructor
+		public Menu(string menuId, string menuName)
+		{
+			this.menuId = menuId;
+			this.menuName = menuName;
+
+			foodItemList = new List<FoodItem>();
+        }
+		// method to add food item
+		public void AddFoodItem(FoodItem foodItem)
+		{
+			foodItemList.Add(foodItem);
+        }
+        // method to remove food item
+		public bool RemoveFoodItem(FoodItem foodItem)
+		{
+			return foodItemList.Remove(foodItem);
+		}
+        // method to display all food items
+		public void DisplayFoodItems()
+		{
+			Console.WriteLine("Food Items in Menu:");
+			foreach (FoodItem item in foodItemList)
+			{
+				Console.WriteLine(item);
+            }
+        }
+		public override string ToString()
+		{
+			return "Menu ID: " + menuId + "\nMenu Name: " + menuName;
         }
     }
 }
@@ -444,4 +499,3 @@ namespace S10273431_PRG2Assignment
         }
     }
 }
-
