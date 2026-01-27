@@ -181,6 +181,8 @@ namespace ASG_pt1
         }
     }
 }
+
+# Restaurant Class
 namespace S10273431_PRG2Assignment
 {
     internal class Restaurant
@@ -279,6 +281,8 @@ namespace S10273431_PRG2Assignment
         }
     }
 }
+
+# Special Offer class
 namespace S10273431_PRG2Assignment
 {
     internal class SpecialOffer
@@ -321,6 +325,8 @@ namespace S10273431_PRG2Assignment
         }
     }
 }
+
+# Menu Class
 namespace S10273431_PRG2Assignment
 {
     internal class Menu
@@ -380,6 +386,8 @@ namespace S10273431_PRG2Assignment
         }
     }
 }
+
+# Updated Order class
 namespace S10273431_PRG2Assignment
 {
     internal class Order
@@ -499,3 +507,26 @@ namespace S10273431_PRG2Assignment
         }
     }
 }
+
+# StreamReader Sample:
+using (StreamReader sr = new StreamReader("testmarks.csv"))
+{
+ 	string? s = sr.ReadLine(); // read the heading
+ 	// display the heading
+ 	if (s != null)
+ 	{
+ 		string[] heading = s.Split(',');
+ 		Console.WriteLine("{0,10}  {1,10}  {2,10}  {3,10}",
+ 		    heading[0], heading[1], heading[2], "Average");
+ 		// repeat until end of the heading
+ 	}
+ 	while ((s=sr.ReadLine()) != null)
+ 	{
+ 		string[] marks = s.Split(',');
+ 		double average = (Convert.ToDouble(marks[1]) +  
+ 		    Convert.ToDouble(marks[2])) / 2;
+ 		Console.WriteLine("{0,10}  {1,10}  {2,10}  {3,10}", 
+ 		    marks[0], marks[1], marks[2], average.ToString("0.00"));
+ 	}
+}
+
