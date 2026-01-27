@@ -1,83 +1,45 @@
-# Reading FoodItem and Restaurant Files (csv)
-using ASG_pt1;
+--FEATURE 1--
+List<Restaurant> restaurantList = new List<Restaurant>();
+List<FoodItem> foodItemList = new List<FoodItem>();
+Dictionary<string, List<FoodItem>> restaurantAssignDict = new Dictionary<string, List<FoodItem>>();
+
+using (StreamReader sr = new StreamReader("restaurants.csv"))
+{
+    string? s = sr.ReadLine(); // header
+    while ((s = sr.ReadLine()) != null)
+    {
+        string[] restaurantData = s.Split(",");
+        string restaurantID = restaurantData[0];
+        string restaurantName = restaurantData[1];
+        string restaurantEmail = restaurantData[2];
+
+        Restaurant restaurant = new Restaurant(restaurantID, restaurantName, restaurantEmail);
+        restaurantList.Add(restaurant);
+
+        // Prepare dictionary entry
+        restaurantAssignDict[restaurantID] = new List<FoodItem>();
+    }
+}
+
 using (StreamReader sr = new StreamReader("fooditems.csv"))
 {
     string? s = sr.ReadLine();
     if (s != null)
     {
-        string[] header = s.Split(' ');
+        string[] header = s.Split(',');
     }
     while((s= sr.ReadLine()) != null)
     {
-        string[] fooditemData = s.Split(" ");
+        string[] fooditemData = s.Split(",");
         string restaurantID = fooditemData[0];
         string fooditemName = fooditemData[1];
         string fooditemDesc = fooditemData[2];
         double fooditemPrice = Convert.ToDouble(fooditemData[3]);
-        FoodItem fooditems = new FoodItem(fooditemName, fooditemDesc, fooditemPrice, " ");
-    }
-}
-
-using (StreamReader sr = new StreamReader("restaurants.csv"))
-{
-    string? s = sr.ReadLine();
-    if (s != null)
-    {
-        string[]header = s.Split(",");
-    }
-    while ((s= sr.ReadLine()) != null)
-    {
-        string[] restaurantData = s.Split(",");
-        string restaurantID = restaurantData[0];
-        string restaurantName = restaurantData[1];
-        string restuarantEmail = restaurantData[2];
-        Restaurant restuarants = new Restaurant(restaurantID, restaurantName, restuarantEmail);
-    }
-}
-using S10273431_PRG2Assignment;
-// load the customers.csv file and create customeer objects based on the data loaded
-using (StreamReader sr = new StreamReader("customer.csv"))
-{
-    string? s = sr.ReadLine(); // read the heading line
-    if (s != null)
-    {
-        string[] heading = s.Split(','); // displayb the headings
-        Console.WriteLine("{0,-16},{1,-16}", heading[0], heading[1]);
-    }
-    while ((s = sr.ReadLine()) != null)
-    {
-        string[] customerData = s.Split(',');
-        string emailAddress = customerData[0];
-        string customerName = customerData[1];
-        Customer customer = new Customer(emailAddress, customerName);
-
-        Console.WriteLine(customer); // test output
-    }
-}
-// load the orders.csv file and create order objects based on the data loaded
-using (StreamReader sr = new StreamReader("orders.csv"))
-{
-    string? s = sr.ReadLine(); // read the heading line
-    if (s != null)
-    {
-        string[] heading = s.Split(','); // displayb the headings
-        Console.WriteLine("{0,-16},{1,-16}", heading[0], heading[1]);
-    }
-    while ((s = sr.ReadLine()) != null)
-    {
-        string[] orderData = s.Split(',');
-        int orderId = int.Parse(orderData[0]);
-        string customerEmail = orderData[1];
-        string restaurantId = orderData[2];
-        DateTime deliveryDateTime = DateTime.Parse(orderData[3] + " " + orderData[4]);
-       
-        string deliveryAddress = orderData[5];
-        DateTime orderDateTime = DateTime.Parse(orderData[6]);
-        double totalAmount = double.Parse(orderData[7]);
-        string status = orderData[8];
-        
-        Order order = new Order(orderId, orderDateTime, totalAmount, status, deliveryDateTime, deliveryAddress, "Credit Card", true);
-
-        Console.WriteLine(order); // test output
+        FoodItem fooditem = new FoodItem(fooditemName, fooditemDesc, fooditemPrice, " ");
+        foodItemList.Add(fooditem);
+        if (restaurantAssignDict.ContainsKey(restaurantID))
+        {
+            restaurantAssignDict[restaurantID].Add(fooditem);
+        }
     }
 }
