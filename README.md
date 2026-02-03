@@ -1,6 +1,203 @@
-# Programming-II-Assignment
-# Customer class:
+# Restuarant class:
+namespace ASG_pt1
+{
+    internal class Restaurant
+    {
+        public string RestaurantId { get; set; }
+        public string RestaurantName { get; set; }
+        public string RestaurantEmail { get; set; }
+        public Restaurant MenuRestaurant { get; set; }
 
+        // list to hold menus and special offers
+        public List<Menu> menuList = new List<Menu>();
+        public List<SpecialOffer> specialOfferList = new List<SpecialOffer>();
+        public List<Order> orderList = new List<Order>();
+
+        // default constructor
+        public Restaurant()
+        {
+            menuList = new List<Menu>();
+            specialOfferList = new List<SpecialOffer>();
+            orderList = new List<Order>();
+        }
+        // parameterized constructor
+        public Restaurant(string restaurantId, string restaurantName, string restaurantEmail)
+        {
+            RestaurantId = restaurantId;
+            RestaurantName = restaurantName;
+            RestaurantEmail = restaurantEmail;
+
+            menuList = new List<Menu>();
+            specialOfferList = new List<SpecialOffer>();
+            orderList = new List<Order>();
+        }
+        // method to display orders
+        public void DisplayOrders()
+        {
+            Console.WriteLine("Orders for " + RestaurantName);
+            if (orderList.Count == 0)
+            {
+                Console.WriteLine("No orders yet.");
+                return;
+            }
+            foreach (Order order in orderList)
+            {
+                Console.WriteLine(order);
+                Console.WriteLine("Ordered Items:");
+                order.DisplayOrderedFoodItems();
+            }
+        }
+        // method to display special offers
+        public void DisplaySpecialOffers()
+        {
+            Console.WriteLine("Special Offers for " + RestaurantName);
+            foreach (SpecialOffer offer in specialOfferList)
+            {
+                Console.WriteLine(offer);
+            }
+        }
+        // method to display menu
+        public void DisplayMenu()
+        {
+            Console.WriteLine("Menus for " + RestaurantName);
+            foreach (Menu menu in menuList)
+            {
+                menu.DisplayFoodItems();
+            }
+        }
+        // method to add menu 
+        public void AddMenu(Menu menu)
+        {
+            menuList.Add(menu);
+        }
+        // method to remove menu
+        public void RemoveMenu(Menu menu)
+        {
+            menuList.Remove(menu);
+        }
+        public override string ToString()
+        {
+            return "Restaurant ID: " + RestaurantId + "\nRestaurant Name: " + RestaurantName + "\nRestaurant Email: " + RestaurantEmail;
+        }
+    }
+ }
+
+ # Fooditem Class:
+ namespace ASG_pt1
+{
+    internal class FoodItem
+    {
+        public string ItemName { get; set; }
+        public string ItemDesc { get; set; }
+
+        public double ItemPrice { get; set; }
+        public string Customise { get; set; }
+        public Menu FoodItemMenu {  get; set; }
+
+        public FoodItem(string name,string desc, double price, string customise)
+        {
+            ItemName = name;
+            ItemDesc = desc;
+            ItemPrice = price;
+            Customise = customise;
+        }
+
+        public FoodItem(string name, string desc, double price, string customise, Menu menu): this(name, desc, price, customise)
+        {
+            FoodItemMenu = menu;
+        }
+
+        public override string ToString()
+        {
+            return "Item Name:" + ItemName + "\nItem Description: " + ItemDesc + "\nItem Price: " + ItemPrice + "\nCustomise: " + Customise;
+        }
+    }
+}
+
+# Order Class:
+namespace ASG_pt1
+{
+    internal class Order
+    {
+        public int OrderId { get; set; }
+        public DateTime OrderDateTime { get; set; }
+        public double OrderTotal { get; set; }
+        public string OrderStatus { get; set; }
+        public DateTime DeliveryDateTime { get; set; }
+        public string DeliveryAddress { get; set; }
+        public string OrderPaymentMethod { get; set; }
+        public bool OrderPaid { get; set; }
+        public Customer Ordercustomer { get; set; }
+        public Restaurant Orderrestaurant { get; set; }
+        public SpecialOffer OrderspecialOffer { get; set; }
+        public List<OrderedFoodItem> orderfooditemList { get; set; } = new List<OrderedFoodItem> ();
+
+        public Order() { }
+
+        public Order(int orderid, DateTime orderdatetime, double ordertotal, string orderstatus, DateTime deliverydatetime, string deliveryaddress, string orderpaymentmethod, bool orderpaid)
+        {
+            OrderId = orderid;
+            OrderDateTime = orderdatetime;
+            OrderTotal = ordertotal;
+            OrderStatus = orderstatus;
+            DeliveryDateTime = deliverydatetime;
+            DeliveryAddress = deliveryaddress;
+            OrderPaymentMethod = orderpaymentmethod;
+            OrderPaid = orderpaid;
+        }
+
+        public Order(int orderid, DateTime orderdatetime, double ordertotal, string orderstatus, DateTime deliverydatetime, string deliveryaddress, string orderpaymentmethod, bool orderpaid, Customer customer, Restaurant restaurant)
+            : this(orderid, orderdatetime, ordertotal,orderstatus, deliverydatetime, deliveryaddress, orderpaymentmethod, orderpaid)
+        {
+            Ordercustomer = customer;
+            Orderrestaurant = restaurant;
+        }
+
+        public Order(int orderid, DateTime orderdatetime, double ordertotal, string orderstatus, DateTime deliverydatetime, string deliveryaddress, string orderpaymentmethod, bool orderpaid, Customer customer, Restaurant restaurant, SpecialOffer specialoffer)
+            : this(orderid, orderdatetime, ordertotal, orderstatus, deliverydatetime, deliveryaddress, orderpaymentmethod, orderpaid, customer, restaurant)
+        {
+            OrderspecialOffer = specialoffer;
+        }
+
+        public double CalculateOrderTotal()
+        {
+            double orderTotal = 0;
+            foreach(OrderedFoodItem item in orderfooditemList)
+            {
+                orderTotal += item.SubTotal;
+            }
+            return orderTotal;
+        }
+
+        public void AddOrderedFoodItem(OrderedFoodItem fooditem)
+        {
+           orderfooditemList.Add(fooditem);
+        }
+
+        public bool RemoveOrderedFoodItem(OrderedFoodItem fooditem)
+        {
+            orderfooditemList.Remove(fooditem);
+            return true;
+        }
+
+        public void DisplayOrderedFoodItems()
+        {
+            foreach (OrderedFoodItem item in orderfooditemList)
+            {
+                Console.WriteLine(item);
+            }
+        }
+        public override string ToString()
+        {
+            return "Order ID: " + OrderId + "Order DateTime: " + OrderDateTime + "Order Total: " + OrderTotal +
+                   "Order Status: " + OrderStatus + "Delivery DateTime: " + DeliveryDateTime +
+                   "Delivery Address: " + DeliveryAddress + "Order Payment Method: " + OrderPaymentMethod +
+                   "Order Paid: " + OrderPaid;
+        }
+    }
+}
+
+# Customer class:
 namespace ASG_pt1
 {
     internal class Customer
@@ -18,17 +215,7 @@ namespace ASG_pt1
 
         public void AddOrder(Order orderitem)
         {
-            foreach(Order item in orderList)
-            {
-                if (item.OrderId == orderitem.OrderId)
-                {
-                    orderList.Add(orderitem);
-                }
-                else
-                {
-                    Console.WriteLine("Invalid OrderId");
-                }
-            }
+            orderList.Add(orderitem);
         }
 
         public void DisplayAllOrders()
@@ -64,34 +251,94 @@ namespace ASG_pt1
     }
 }
 
-# Food Item class:
+# SpecialOffer class:
 namespace ASG_pt1
 {
-    internal class FoodItem
+    internal class SpecialOffer
     {
-        public string ItemName { get; set; }
-        public string ItemDesc { get; set; }
+        public string OfferCode { get; set; }
+        public string OfferDesc { get; set; }
+        public double Discount { get; set; }
+        public Restaurant SOrestaurant { get; set; }
 
-        public double ItemPrice { get; set; }
-        public string Customise { get; set; }
-
-        public FoodItem(string name,string desc, double price, string customise)
+        public List<Order> orderList = new List<Order>();
+        // default constructor
+        public SpecialOffer(){ }
+        // parameterized constructor
+        public SpecialOffer(string offerCode, string offerDesc, double discount)
         {
-            ItemName = name;
-            ItemDesc = desc;
-            ItemPrice = price;
-            Customise = customise;
-            //note: remember to do the one or more thingy over here for the menu class
+            OfferCode = offerCode;
+            OfferDesc = offerDesc;
+            Discount = discount;
         }
 
+        public SpecialOffer(string offerCode, string offerDesc, double discount, Restaurant restaurant): this(offerCode, offerDesc, discount)
+        {
+            SOrestaurant = restaurant;
+        }
         public override string ToString()
         {
-            return "Item Name:" + ItemName + "\nItem Description: " + ItemDesc + "\nItem Price: " + ItemPrice + "\nCustomise: " + Customise;
+            return "Offer Code: " + OfferCode + "\nOffer Description: " + OfferDesc + "\nDiscount: " + Discount;
         }
     }
+    }
+
+# Menu class:
+namespace ASG_pt1
+{
+	internal class Menu
+	{
+		public string MenuId { get; set; }
+		public string MenuName { get; set; }
+		public Restaurant MenuRestaurant { get; set; }
+
+		// list to hold food items
+		public List<FoodItem> foodItemList = new List<FoodItem>();
+
+		// default constructor
+		public Menu()
+		{
+			foodItemList = new List<FoodItem>();
+		}
+		// parameterized constructor
+		public Menu(string menuId, string menuName)
+		{
+			MenuId = menuId;
+			MenuName = menuName;
+		}
+
+		public Menu(string menuId, string menuName,Restaurant restaurant): this (menuId, menuName)
+		{
+			MenuRestaurant = restaurant;
+		}
+
+        // method to add food item
+        public void AddFoodItem(FoodItem foodItem)
+		{
+			foodItemList.Add(foodItem);
+		}
+		// method to remove food item
+		public bool RemoveFoodItem(FoodItem foodItem)
+		{
+			return foodItemList.Remove(foodItem);
+		}
+		// method to display all food items
+		public void DisplayFoodItems()
+		{
+			Console.WriteLine("Food Items in Menu:");
+			foreach (FoodItem item in foodItemList)
+			{
+				Console.WriteLine(item);
+			}
+		}
+		public override string ToString()
+		{
+			return "Menu ID: " + MenuId + "\nMenu Name: " + MenuName;
+		}
+	}
 }
 
-# OrderedFoodItem Class:
+# OrderdFoodItem class:
 namespace ASG_pt1
 {
     internal class OrderedFoodItem : FoodItem
@@ -105,7 +352,6 @@ namespace ASG_pt1
             QtyOrdered = qtyOrdered;
             SubTotal = subTotal;
             OrderOFI = orderOFL;
-            orderOFL.orderfooditemList.Add(this);
         }
 
         public double CalculateSubTotal()
@@ -114,419 +360,3 @@ namespace ASG_pt1
         }
     }
 }
-
-# Ordered Class:
-namespace ASG_pt1
-{
-    internal class Order
-    {
-        public int OrderId { get; set; }
-        public DateTime OrderDateTime { get; set; }
-        public double OrderTotal { get; set; }
-        public string OrderStatus { get; set; }
-        public DateTime DeliveryDateTime { get; set; }
-        public string DeliveryAddress { get; set; }
-        public string OrderPaymentMethod { get; set; }
-        public bool OrderPaid { get; set; }
-
-        public Customer Ordercustomer { get; set; }
-        public List<OrderedFoodItem> orderfooditemList { get; set; } = new List<OrderedFoodItem> ();
-
-        public Order() { }
-
-        public Order(int orderid, DateTime orderdatetime, double ordertotal, string orderstatus, DateTime deliverydatetime, string deliveryaddress, string orderpaymentmethod, bool orderpaid, Customer customer)
-        {
-            OrderId = orderid;
-            OrderDateTime = orderdatetime;
-            OrderTotal = ordertotal;
-            OrderStatus = orderstatus;
-            DeliveryDateTime = deliverydatetime;
-            DeliveryAddress = deliveryaddress;
-            OrderPaymentMethod = orderpaymentmethod;
-            OrderPaid = orderpaid;
-            Ordercustomer = customer;
-
-            customer.orderList.Add(this);
-        }
-
-        public double CalculateOrderTotal()
-        {
-            double orderTotal = 0;
-            foreach(OrderedFoodItem item in orderfooditemList)
-            {
-                orderTotal += item.SubTotal;
-            }
-            return orderTotal;
-        }
-
-        public void AddOrderedFoodItem(OrderedFoodItem fooditem)
-        {
-           orderfooditemList.Add(fooditem);
-        }
-
-        public bool RemoveOrderedFoodItem(OrderedFoodItem fooditem)
-        {
-            orderfooditemList.Remove(fooditem);
-            return true;
-        }
-
-        public void DisplayOrderedFoodItems()
-        {
-
-        }
-
-        public override string ToString()
-        {
-            return base.ToString();
-        }
-    }
-}
-
-# Restaurant Class
-namespace S10273431_PRG2Assignment
-{
-    internal class Restaurant
-    {
-		private string restaurantId;
-
-		public string RestaurantId
-		{
-			get { return restaurantId; }
-			set { restaurantId = value; }
-		}
-		private string restaurantName;
-
-		public string RestaurantName
-		{
-			get { return restaurantName; }
-			set { restaurantName = value; }
-		}
-		private string restaurantEmail;
-
-		public string RestaurantEmail
-        {
-			get { return restaurantEmail; }
-			set { restaurantEmail = value; }
-		}
-        // list to hold menus and special offers
-		private List<Menu> menuList = new List<Menu>();
-		private List<SpecialOffer> specialOfferList = new List<SpecialOffer>();
-		private List<Order> orderList = new List<Order>();
-
-        // default constructor
-        public Restaurant()
-		{
-			menuList = new List<Menu>();
-			specialOfferList = new List<SpecialOffer>();
-			orderList = new List<Order>();
-        }
-        // parameterized constructor
-		public Restaurant(string restaurantId, string restaurantName, string restaurantEmail)
-		{
-			this.restaurantId = restaurantId;
-			this.restaurantName = restaurantName;
-			this.restaurantEmail = restaurantEmail;
-
-			menuList = new List<Menu>();
-			specialOfferList = new List<SpecialOffer>();
-			orderList = new List<Order>();
-        }
-		// method to display orders
-		public void DisplayOrders()
-		{
-			Console.WriteLine("Orders for " + restaurantName);
-			if (orderList.Count == 0)
-			{
-				Console.WriteLine("No orders yet.");
-				return;
-            }
-			foreach (Order order in orderList)
-			{
-				Console.WriteLine(order);
-				Console.WriteLine("Ordered Items:");
-				order.DisplayOrderedFoodItems();
-            }
-        }
-        // method to display special offers
-		public void DisplaySpecialOffers()
-		{
-			Console.WriteLine("Special Offers for " + restaurantName);
-			foreach (SpecialOffer offer in specialOfferList)
-			{
-				Console.WriteLine(offer);
-            }
-        }
-		// method to display menu
-		public void DisplayMenu()
-		{
-			Console.WriteLine("Menus for " + restaurantName);
-			foreach (Menu menu in menuList)
-			{
-				menu.DisplayFoodItems();
-            }
-        }
-		// method to add menu 
-		public void AddMenu(Menu menu)
-		{
-			menuList.Add(menu);
-        }
-        // method to remove menu
-		public void RemoveMenu(Menu menu)
-		{
-			menuList.Remove(menu);
-        }
-		public override string ToString()
-		{
-			return "Restaurant ID: " + restaurantId + "\nRestaurant Name: " + restaurantName + "\nRestaurant Email: " + restaurantEmail;
-        }
-    }
-}
-
-# Special Offer class
-namespace S10273431_PRG2Assignment
-{
-    internal class SpecialOffer
-    {
-		private string offerCode;
-
-		public string OfferCode
-		{
-			get { return offerCode; }
-			set { offerCode = value; }
-		}
-		private string offerDesc;
-
-		public string OfferDesc
-		{
-			get { return offerDesc; }
-			set { offerDesc = value; }
-		}
-		private double discount;
-
-		public double Discount
-		{
-			get { return discount; }
-			set { discount = value; }
-		}
-		// default constructor
-		public SpecialOffer()
-		{
-		}
-		// parameterized constructor
-		public SpecialOffer(string offerCode, string offerDesc, double discount)
-		{
-			this.offerCode = offerCode;
-			this.offerDesc = offerDesc;
-			this.discount = discount;
-		}
-		public override string ToString()
-		{
-			return "Offer Code: " + offerCode + "\nOffer Description: " + offerDesc + "\nDiscount: " + discount;
-        }
-    }
-}
-
-# Menu Class
-namespace S10273431_PRG2Assignment
-{
-    internal class Menu
-    {
-		private string menuId;
-
-		public string MenuId
-		{
-			get { return menuId; }
-			set { menuId = value; }
-		}
-		private string menuName;
-
-		public string MenuName
-		{
-			get { return menuName; }
-			set { menuName = value; }
-		}
-        // list to hold food items
-		private List<FoodItem> foodItemList = new List<FoodItem>();
-
-        // default constructor
-        public Menu()
-		{
-			foodItemList = new List<FoodItem>();
-        }
-        // parameterized constructor
-		public Menu(string menuId, string menuName)
-		{
-			this.menuId = menuId;
-			this.menuName = menuName;
-
-			foodItemList = new List<FoodItem>();
-        }
-		// method to add food item
-		public void AddFoodItem(FoodItem foodItem)
-		{
-			foodItemList.Add(foodItem);
-        }
-        // method to remove food item
-		public bool RemoveFoodItem(FoodItem foodItem)
-		{
-			return foodItemList.Remove(foodItem);
-		}
-        // method to display all food items
-		public void DisplayFoodItems()
-		{
-			Console.WriteLine("Food Items in Menu:");
-			foreach (FoodItem item in foodItemList)
-			{
-				Console.WriteLine(item);
-            }
-        }
-		public override string ToString()
-		{
-			return "Menu ID: " + menuId + "\nMenu Name: " + menuName;
-        }
-    }
-}
-
-# Updated Order class
-namespace S10273431_PRG2Assignment
-{
-    internal class Order
-    {
-        private List<OrderedFoodItem> orderedFoodItemList;
-
-        private int orderId;
-
-		public int OrderID
-		{
-			get { return orderId; }
-			set { orderId = value; }
-		}
-		private DateTime orderDateTime;
-
-		public DateTime OrderDateTime
-		{
-			get { return orderDateTime; }
-			set { orderDateTime = value; }
-		}
-		private double orderTotal;
-
-		public double OrderTotal
-		{
-			get { return orderTotal; }
-			set { orderTotal = value; }
-		}
-		private string orderStatus;
-
-		public string OrderStatus
-		{
-			get { return orderStatus; }
-			set { orderStatus = value; }
-		}
-		private DateTime deliveryDateTime;
-
-		public DateTime DeliveryDateTime
-        {
-			get { return deliveryDateTime; }
-			set { deliveryDateTime = value; }
-		}
-		private string deliveryAddress;
-
-		public string DeliveryAddress
-		{
-			get { return deliveryAddress; }
-			set { deliveryAddress = value; }
-		}
-		private string orderPaymentMethod;
-
-		public string OrderPaymentMethod
-		{
-			get { return orderPaymentMethod; }
-			set { orderPaymentMethod = value; }
-		}
-		private bool orderPaid;
-
-		public bool OrderPaid
-		{
-			get { return orderPaid; }
-			set { orderPaid = value; }
-		}
-		// default constructor
-		public Order() 
-		{
-			orderedFoodItemList = new List<OrderedFoodItem>();
-        }
-        // parameterized constructor
-        public Order(int orderId, DateTime orderDateTime, double orderTotal, string orderStatus,
-                     DateTime deliveryDateTime, string deliveryAddress, string orderPaymentMethod, bool orderPaid)
-        {
-            this.orderId = orderId;
-            this.orderDateTime = orderDateTime;
-            this.orderTotal = orderTotal;
-            this.orderStatus = orderStatus;
-            this.deliveryDateTime = deliveryDateTime;
-            this.deliveryAddress = deliveryAddress;
-            this.orderPaymentMethod = orderPaymentMethod;
-            this.orderPaid = orderPaid;
-			orderedFoodItemList = new List<OrderedFoodItem>();
-        }
-        // method to calculate order total
-        public double CalculateOrderTotal()
-		{
-			double total = 0.0;
-			foreach (OrderedFoodItem item in orderedFoodItemList)
-			{
-				total += item.SubTotal;
-            }
-			orderTotal = total;
-			return total;
-        }
-        // method to add ordered food item
-        public void AddOrderedFoodItem(OrderedFoodItem item)
-        {
-            orderedFoodItemList.Add(item);
-        }
-		// method to remove ordered food item
-		public bool RemoveOrderedFoodItem(OrderedFoodItem item)
-		{
-			return orderedFoodItemList.Remove(item);
-        }
-        // method to display ordered food items
-        public void DisplayOrderedFoodItems()
-        {
-            foreach (OrderedFoodItem item in orderedFoodItemList)
-            {
-                Console.WriteLine(item);
-            }
-        }
-        public override string ToString()
-		{
-			return "Order ID: " + orderId + "Order DateTime: " + orderDateTime + "Order Total: " + orderTotal +
-				   "Order Status: " + orderStatus + "Delivery DateTime: " + deliveryDateTime +
-				   "Delivery Address: " + deliveryAddress + "Order Payment Method: " + orderPaymentMethod +
-				   "Order Paid: " + orderPaid;
-        }
-    }
-}
-
-# StreamReader Sample:
-using (StreamReader sr = new StreamReader("testmarks.csv"))
-{
- 	string? s = sr.ReadLine(); // read the heading
- 	// display the heading
- 	if (s != null)
- 	{
- 		string[] heading = s.Split(',');
- 		Console.WriteLine("{0,10}  {1,10}  {2,10}  {3,10}",
- 		    heading[0], heading[1], heading[2], "Average");
- 		// repeat until end of the heading
- 	}
- 	while ((s=sr.ReadLine()) != null)
- 	{
- 		string[] marks = s.Split(',');
- 		double average = (Convert.ToDouble(marks[1]) +  
- 		    Convert.ToDouble(marks[2])) / 2;
- 		Console.WriteLine("{0,10}  {1,10}  {2,10}  {3,10}", 
- 		    marks[0], marks[1], marks[2], average.ToString("0.00"));
- 	}
-}
-
