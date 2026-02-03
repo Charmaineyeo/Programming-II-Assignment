@@ -1,6 +1,11 @@
---FEATURE 1--
+//Part1 - Luanne 
+using ASG_pt1;
+using System.Globalization;
 List<Restaurant> restaurantList = new List<Restaurant>();
 List<FoodItem> foodItemList = new List<FoodItem>();
+List<Customer> customerList = new List<Customer>();
+List<Order> orderList = new List<Order>();
+List<SpecialOffer> specialofferList = new List<SpecialOffer>();
 Dictionary<string, List<FoodItem>> restaurantAssignDict = new Dictionary<string, List<FoodItem>>();
 
 using (StreamReader sr = new StreamReader("restaurants.csv"))
@@ -9,13 +14,13 @@ using (StreamReader sr = new StreamReader("restaurants.csv"))
     while ((s = sr.ReadLine()) != null)
     {
         string[] restaurantData = s.Split(",");
-        string restaurantID = restaurantData[0];
-        string restaurantName = restaurantData[1];
-        string restaurantEmail = restaurantData[2];
+        string restaurantID = restaurantData[0].Trim();
+        string restaurantName = restaurantData[1].Trim();
+        string restaurantEmail = restaurantData[2].Trim();
 
         Restaurant restaurant = new Restaurant(restaurantID, restaurantName, restaurantEmail);
         restaurantList.Add(restaurant);
-
+        //Console.WriteLine("{0,-10}{1,-10}{2,-10}", restaurantID, restaurantName, restaurantEmail);
         // Prepare dictionary entry
         restaurantAssignDict[restaurantID] = new List<FoodItem>();
     }
@@ -31,11 +36,12 @@ using (StreamReader sr = new StreamReader("fooditems.csv"))
     while((s= sr.ReadLine()) != null)
     {
         string[] fooditemData = s.Split(",");
-        string restaurantID = fooditemData[0];
-        string fooditemName = fooditemData[1];
-        string fooditemDesc = fooditemData[2];
+        string restaurantID = fooditemData[0].Trim();
+        string fooditemName = fooditemData[1].Trim();
+        string fooditemDesc = fooditemData[2].Trim();
         double fooditemPrice = Convert.ToDouble(fooditemData[3]);
         FoodItem fooditem = new FoodItem(fooditemName, fooditemDesc, fooditemPrice, " ");
+        // must asign menu later now it is null so it doesnt need to be in the class for now
         foodItemList.Add(fooditem);
         if (restaurantAssignDict.ContainsKey(restaurantID))
         {
@@ -43,71 +49,81 @@ using (StreamReader sr = new StreamReader("fooditems.csv"))
         }
     }
 }
-using S10273431_PRG2Assignment;
-// load the customers.csv file and create customeer objects based on the data loaded
+
+//Part3 - Charmaine
 using (StreamReader sr = new StreamReader("customers.csv"))
 {
     string? s = sr.ReadLine(); // read the heading line
     if (s != null)
     {
         string[] heading = s.Split(','); // displayb the headings
-        Console.WriteLine("{0,-16},{1,-16}", heading[0], heading[1]);
+        //Console.WriteLine("{0,-16},{1,-16}", heading[0], heading[1]);
     }
     while ((s = sr.ReadLine()) != null)
     {
         string[] customerData = s.Split(',');
-        string emailAddress = customerData[0];
-        string customerName = customerData[1];
+        string emailAddress = customerData[1].Trim();
+        string customerName = customerData[0].Trim();
         Customer customer = new Customer(emailAddress, customerName);
+        customerList.Add(customer);
 
-        Console.WriteLine(customer); // test output
+        //Console.WriteLine(customer); // test output
     }
 }
-// create customer and restaurant list
-List<Customer> customerList = new List<Customer>();
-List<Restaurant> restaurantList = new List<Restaurant>();
-// load the orders.csv file and create order objects based on the data loaded
+
 using (StreamReader sr = new StreamReader("orders.csv"))
 {
-    string? s = sr.ReadLine(); // read the heading line
-    if (s != null)
-    {
-        string[] heading = s.Split(','); // displayb the headings
-        Console.WriteLine("{0,-16},{1,-16}", heading[0], heading[1]);
-    }
+    string? s = sr.ReadLine(); // skip header
     while ((s = sr.ReadLine()) != null)
     {
         string[] orderData = s.Split(',');
-        int orderId = int.Parse(orderData[0]);
-        string customerEmail = orderData[1];
-        string restaurantId = orderData[2];
-        DateTime deliveryDateTime = DateTime.Parse(orderData[3] + " " + orderData[4]);
-       
-        string deliveryAddress = orderData[5];
-        DateTime orderDateTime = DateTime.Parse(orderData[6]);
-        double totalAmount = double.Parse(orderData[7]);
-        string status = orderData[8];
-        
-        Order order = new Order(orderId, orderDateTime, totalAmount, status, deliveryDateTime, deliveryAddress, "Credit Card", true);
 
-        // add to csustomer's order list
-        foreach(Customer c in customerList)
+        int orderId = Convert.ToInt32(orderData[0]);
+        string customerEmail = orderData[1].Trim();
+        string restaurantId = orderData[2].Trim();
+        DateTime deliveryDateTime = Convert.ToDateTime(orderData[3] + " " + orderData[4]);
+
+        string deliveryAddress = orderData[5].Trim();
+        DateTime orderDateTime = Convert.ToDateTime(orderData[6]);
+        double totalAmount = Convert.ToDouble(orderData[7]);
+        string status = orderData[8].Trim();
+
+        // Find customer manually
+        Customer foundCustomer = null;
+        foreach (Customer c in customerList)
         {
-            if (c.EmailAddress == customerEmail)
+            if (c.EmailAddress.Trim().ToLower() == orderData[1].Trim().ToLower())
             {
-                c.AddOrder(order);
+                foundCustomer = c;
                 break;
             }
         }
-        // add to restaurant's order queue
-        foreach( Restaurant r in restaurantList)
+
+        if (foundCustomer == null)
         {
-            if (r.RestaurantId == restaurantId)
+            Console.WriteLine("Customer not found.");
+            continue;
+        }
+
+        // Find restaurant manually
+        Restaurant foundRestaurant = null;
+        foreach (Restaurant r in restaurantList)
+        {
+            if (r.RestaurantId.Trim().ToLower() == orderData[2].Trim().ToLower())
             {
-                r.orderList.Add(order);
+                foundRestaurant = r;
                 break;
             }
         }
-        Console.WriteLine(order); // test output
+
+        if (foundRestaurant == null)
+        {
+            Console.WriteLine("Restaurant not found.");
+            continue;
+        }
+
+        Order order = new Order(orderId, orderDateTime, totalAmount, status, deliveryDateTime, deliveryAddress, "Credit Card", true, foundCustomer, foundRestaurant);
+        orderList.Add(order);
+        //Console.WriteLine(order); // test output
     }
 }
