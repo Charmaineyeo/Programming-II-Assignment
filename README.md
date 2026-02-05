@@ -1,4 +1,5 @@
-# Restuarant class:
+# Classes
+## Restuarant class:
 namespace ASG_pt1
 {
     internal class Restaurant
@@ -82,7 +83,7 @@ namespace ASG_pt1
     }
  }
 
- # Fooditem Class:
+## Fooditem Class:
  namespace ASG_pt1
 {
     internal class FoodItem
@@ -114,7 +115,7 @@ namespace ASG_pt1
     }
 }
 
-# Order Class:
+## Order Class:
 namespace ASG_pt1
 {
     internal class Order
@@ -197,7 +198,7 @@ namespace ASG_pt1
     }
 }
 
-# Customer class:
+## Customer class:
 namespace ASG_pt1
 {
     internal class Customer
@@ -251,7 +252,7 @@ namespace ASG_pt1
     }
 }
 
-# SpecialOffer class:
+## SpecialOffer class:
 namespace ASG_pt1
 {
     internal class SpecialOffer
@@ -283,7 +284,7 @@ namespace ASG_pt1
     }
     }
 
-# Menu class:
+## Menu class:
 namespace ASG_pt1
 {
 	internal class Menu
@@ -338,7 +339,7 @@ namespace ASG_pt1
 	}
 }
 
-# OrderdFoodItem class:
+## OrderdFoodItem class:
 namespace ASG_pt1
 {
     internal class OrderedFoodItem : FoodItem
@@ -360,3 +361,164 @@ namespace ASG_pt1
         }
     }
 }
+
+# Luanne's features:
+## part 4
+void DisplayallOrders(List<Order> orderList)
+{
+    Console.WriteLine("All Orders");
+    Console.WriteLine("==========");
+    Console.WriteLine("{0,-12}{1,-15}{2,-18}{3,-24}{4,-15}{5,-15}", "Order ID", "Customer", "Restaurant", "Delivery Date/Time", "Amount", "Status");
+    Console.WriteLine("--------    -----------    -------------     ------------------      ------       ---------");
+    foreach (Order order in orderList)
+    {
+        Console.WriteLine("{0,-12}{1,-15}{2,-18}{3,-25}{4,-15}{5,-15}", order.OrderId, order.Ordercustomer.CustomerName, order.Orderrestaurant.RestaurantName, order.DeliveryDateTime, order.CalculateOrderTotal(), order.OrderStatus);
+    }
+}
+
+//DisplayallOrders(orderList); output
+
+## part 6
+void Processorder(List<Order> orderList, List<OrderedFoodItem> orderedFoodList)
+{
+    Console.WriteLine("Process Order");
+    Console.WriteLine("=============");
+
+    while (true)
+    {
+        Console.Write("Enter Restaurant ID: ");
+        string inputRestaurantID = Console.ReadLine();
+        Console.WriteLine(" ");
+
+        foreach (Order detail in orderList)
+        {
+            if (inputRestaurantID == detail.Orderrestaurant.RestaurantId)
+            {
+                Console.WriteLine("Order {0}: ", detail.OrderId);
+                Console.WriteLine("Customer: {0}", detail.Ordercustomer.CustomerName);
+                Console.WriteLine("Ordered Items:");
+
+                int itemnum = 1;
+                foreach (OrderedFoodItem orderitem in orderedFoodList)
+                {
+                    if (detail.OrderId == orderitem.OrderOFI.OrderId)
+                    {
+                        Console.WriteLine("{0}. {1} - {2}", itemnum, orderitem.ItemName, orderitem.QtyOrdered);
+                        itemnum++;
+                    }
+                }
+
+                Console.WriteLine("Delivery date/time: {0}", detail.DeliveryDateTime);
+                Console.WriteLine("Total Amount: ${0}", detail.CalculateOrderTotal());
+                Console.WriteLine("Order Status: {0}", detail.OrderStatus);
+
+                Console.Write("[C]onfirm / [R]eject / [S]kip / [D]eliver: ");
+                string userorderAnswer = Console.ReadLine().ToLower();
+
+                if (userorderAnswer == "c" && detail.OrderStatus.ToLower() == "pending")
+                {
+                    detail.OrderStatus = "Preparing";
+                }
+                else if (userorderAnswer == "r" && detail.OrderStatus.ToLower() == "pending")
+                {
+                    detail.OrderStatus = "Rejected";
+                }
+                else if (userorderAnswer == "d" && detail.OrderStatus.ToLower() == "preparing")
+                {
+                    detail.OrderStatus = "Delivered";
+                }
+                if (userorderAnswer == "s" && detail.OrderStatus.ToLower() == "cancelled")
+                {
+                    continue;
+                }
+                else
+                {
+                    Console.WriteLine("You cannot skip an order than is not cancelled.");
+                }
+                // skip does nothing
+
+                Console.WriteLine("Order {0} updated. Status: {1}", detail.OrderId, detail.OrderStatus);
+                Console.WriteLine("\n");
+            }
+        }
+    }
+}
+
+//Processorder(orderList, orderfooditemList); output
+
+## part 8
+void DeleteExistingOrder(List<Order> orderList, List<OrderedFoodItem> orderedFoodList)
+{
+    Console.WriteLine("Delete Order");
+    Console.WriteLine("============");
+
+    Console.Write("Enter Customer Email:");
+    string usercustomerEmail = Console.ReadLine().Trim().ToLower();
+
+    Console.WriteLine("Pending Orders:");
+
+    foreach (Order item in orderList)
+    {
+        if (item.OrderStatus.ToLower() == "pending" && item.Ordercustomer.EmailAddress.ToLower() == usercustomerEmail)
+        {
+            Console.WriteLine(item.OrderId);
+        }
+    }
+    Console.Write("Enter Order ID: ");
+    int userOrderID = Convert.ToInt32(Console.ReadLine());
+    Console.WriteLine("\n");
+
+    Order selectedOrder = null;
+
+    foreach (Order item in orderList)
+    {
+        if (item.OrderId == userOrderID &&
+            item.OrderStatus.ToLower() == "pending")
+        {
+            selectedOrder = item;
+            break;
+        }
+    }
+
+    if (selectedOrder == null)
+    {
+        Console.WriteLine("Order not found.");
+        return;
+    }
+    Console.WriteLine("Customer: {0}", selectedOrder.Ordercustomer.CustomerName);
+    Console.WriteLine("Ordered Items:");
+    int itemnum = 1;
+
+    foreach (OrderedFoodItem detail in orderfooditemList)
+    {
+        if (detail.OrderOFI.OrderId == selectedOrder.OrderId)
+        {
+            Console.WriteLine("{0}. {1} - {2}",
+                itemnum, detail.ItemName, detail.QtyOrdered);
+            itemnum++;
+        }
+    }
+
+    Console.WriteLine("Delivery date/time: {0}", selectedOrder.DeliveryDateTime);
+    Console.WriteLine("Total Amount: ${0}", selectedOrder.CalculateOrderTotal());
+    Console.WriteLine("Order Status: {0}", selectedOrder.OrderStatus);
+
+    Console.Write("Confirm deletion? [Y/N]: ");
+    string userAnswer = Console.ReadLine().ToLower();
+
+    if (userAnswer == "y")
+    {
+        selectedOrder.OrderStatus = "Cancelled";
+        Console.WriteLine("Order {0} cancelled.", selectedOrder.OrderId);
+    }
+    else if (userAnswer == "n")
+    {
+        Console.WriteLine("Order not cancelled.");
+    }
+    else
+    {
+        Console.WriteLine("Invalid answer.");
+    }
+}
+
+DeleteExistingOrder(orderList, orderfooditemList);
