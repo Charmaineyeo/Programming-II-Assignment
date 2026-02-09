@@ -372,10 +372,9 @@ void DisplayallOrders(List<Order> orderList)
     Console.WriteLine("--------    -----------    -------------     ------------------      ------       ---------");
     foreach (Order order in orderList)
     {
-        Console.WriteLine("{0,-12}{1,-15}{2,-18}{3,-25}{4,-15}{5,-15}", order.OrderId, order.Ordercustomer.CustomerName, order.Orderrestaurant.RestaurantName, order.DeliveryDateTime, order.CalculateOrderTotal(), order.OrderStatus);
+        Console.WriteLine("{0,-12}{1,-15}{2,-18}{3,-25}{4,-12}{5,-10}", order.OrderId, order.Ordercustomer.CustomerName, order.Orderrestaurant.RestaurantName, order.DeliveryDateTime.ToString("yyyy-MM-dd HH:mm"), order.CalculateOrderTotal(), order.OrderStatus);
     }
 }
-
 //DisplayallOrders(orderList); output
 
 ## part 6
@@ -386,24 +385,36 @@ void Processorder(List<Order> orderList, List<OrderedFoodItem> orderedFoodList)
 
     while (true)
     {
-        Console.Write("Enter Restaurant ID: ");
+        Console.Write("Enter Restaurant ID (or X to exit): ");
         string inputRestaurantID = Console.ReadLine();
-        Console.WriteLine(" ");
+
+        if (inputRestaurantID.ToLower() == "x")
+        {
+            break;
+        }
+
+        Console.WriteLine();
+
+        bool found = false;
 
         foreach (Order detail in orderList)
         {
             if (inputRestaurantID == detail.Orderrestaurant.RestaurantId)
             {
+                found = true;
+
                 Console.WriteLine("Order {0}: ", detail.OrderId);
                 Console.WriteLine("Customer: {0}", detail.Ordercustomer.CustomerName);
                 Console.WriteLine("Ordered Items:");
 
                 int itemnum = 1;
+
                 foreach (OrderedFoodItem orderitem in orderedFoodList)
                 {
                     if (detail.OrderId == orderitem.OrderOFI.OrderId)
                     {
-                        Console.WriteLine("{0}. {1} - {2}", itemnum, orderitem.ItemName, orderitem.QtyOrdered);
+                        Console.WriteLine("{0}. {1} - {2}",
+                            itemnum, orderitem.ItemName, orderitem.QtyOrdered);
                         itemnum++;
                     }
                 }
@@ -427,24 +438,29 @@ void Processorder(List<Order> orderList, List<OrderedFoodItem> orderedFoodList)
                 {
                     detail.OrderStatus = "Delivered";
                 }
-                if (userorderAnswer == "s" && detail.OrderStatus.ToLower() == "cancelled")
+                else if (userorderAnswer == "s")
                 {
-                    continue;
+                    continue; // skip order
                 }
                 else
                 {
-                    Console.WriteLine("You cannot skip an order than is not cancelled.");
+                    Console.WriteLine("Invalid action for current order status.");
                 }
-                // skip does nothing
 
-                Console.WriteLine("Order {0} updated. Status: {1}", detail.OrderId, detail.OrderStatus);
-                Console.WriteLine("\n");
+                Console.WriteLine("Order {0} updated. Status: {1}",
+                    detail.OrderId, detail.OrderStatus);
+
+                Console.WriteLine();
             }
+        }
+
+        if (!found)
+        {
+            Console.WriteLine("Restaurant ID is invalid. Please try again.\n");
         }
     }
 }
-
-//Processorder(orderList, orderfooditemList); output
+//Processorder(orderList, orderfooditemList); 
 
 ## part 8
 void DeleteExistingOrder(List<Order> orderList, List<OrderedFoodItem> orderedFoodList)
@@ -520,5 +536,4 @@ void DeleteExistingOrder(List<Order> orderList, List<OrderedFoodItem> orderedFoo
         Console.WriteLine("Invalid answer.");
     }
 }
-
-DeleteExistingOrder(orderList, orderfooditemList);
+//DeleteExistingOrder(orderList, orderfooditemList);
