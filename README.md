@@ -1,3 +1,132 @@
+# Reading order csv
+using (StreamReader sr = new StreamReader("orders.csv"))
+{
+    string? s = sr.ReadLine(); // skip header
+    while ((s = sr.ReadLine()) != null)
+    {
+        // STEP 1: Find where "Items" column starts
+        int commaCount = 0;
+        int itemsStartIndex = 0;
+        
+        for (int i = 0; i < s.Length; i++)
+        {
+            if (s[i] == ',')
+            {
+                commaCount++;
+                if (commaCount == 9) // After 9 commas = Items column
+                {
+                    itemsStartIndex = i + 1;
+                    break;
+                }
+            }
+        }
+        
+        // STEP 2: Split the line
+        string firstPart = s.Substring(0, itemsStartIndex - 1);
+        string itemsPart = s.Substring(itemsStartIndex);
+        
+        // STEP 3: Parse first part
+        string[] firstColumns = firstPart.Split(',');
+        
+        // STEP 4: Remove quotes
+        itemsPart = itemsPart.Trim('"');
+        
+        // Extract data
+        int orderId = Convert.ToInt32(firstColumns[0]);
+        string customerEmail = firstColumns[1].Trim();
+        string restaurantId = firstColumns[2].Trim();
+        DateTime deliveryDateTime = Convert.ToDateTime(firstColumns[3] + " " + firstColumns[4]);
+        string deliveryAddress = firstColumns[5].Trim();
+        DateTime orderDateTime = Convert.ToDateTime(firstColumns[6]);
+        double totalAmount = Convert.ToDouble(firstColumns[7]);
+        string status = firstColumns[8].Trim();
+        
+        // ===== FIND CUSTOMER =====
+        Customer foundCustomer = null;
+        foreach (Customer c in customerList)
+        {
+            if (c.EmailAddress.Trim().ToLower() == customerEmail.ToLower())
+            {
+                foundCustomer = c;
+                break;
+            }
+        }
+        
+        if (foundCustomer == null)
+        {
+            Console.WriteLine($"Customer {customerEmail} not found for order {orderId}.");
+            continue;
+        }
+        
+        // ===== FIND RESTAURANT =====
+        Restaurant foundRestaurant = null;
+        foreach (Restaurant r in restaurantList)
+        {
+            if (r.RestaurantId.Trim().ToLower() == restaurantId.ToLower())
+            {
+                foundRestaurant = r;
+                break;
+            }
+        }
+        
+        if (foundRestaurant == null)
+        {
+            Console.WriteLine($"Restaurant {restaurantId} not found for order {orderId}.");
+            continue;
+        }
+        
+        // ===== CREATE ORDER =====
+        Order order = new Order(orderId, orderDateTime, totalAmount, status, deliveryDateTime, deliveryAddress, "Credit Card", true, foundCustomer, foundRestaurant);
+        
+        // ===== ADD REAL ITEMS FROM CSV =====
+        if (itemsPart != "")
+        {
+            string[] items = itemsPart.Split('|');
+            
+            foreach (string item in items)
+            {
+                string[] parts = item.Split(',');
+                
+                if (parts.Length >= 2)
+                {
+                    string itemName = parts[0].Trim();
+                    int qty = Convert.ToInt32(parts[1].Trim());
+                    
+                    FoodItem foundFood = null;
+                    foreach (FoodItem fi in foodItemList)
+                    {
+                        if (fi.ItemName.Trim().ToLower() == itemName.ToLower())
+                        {
+                            foundFood = fi;
+                            break;
+                        }
+                    }
+                    
+                    if (foundFood != null)
+                    {
+                        double subTotal = foundFood.ItemPrice * qty;
+                        OrderedFoodItem orderedItem = new OrderedFoodItem(
+                            foundFood.ItemName,
+                            foundFood.ItemDesc,
+                            foundFood.ItemPrice,
+                            "",
+                            qty,
+                            subTotal,
+                            order
+                        );
+                        order.AddOrderedFoodItem(orderedItem);
+                    }
+                }
+            }
+        }
+        
+        // ===== SAVE ORDER =====
+        orderList.Add(order);
+        foundCustomer.orderList.Add(order);
+        restaurantOrderQueue[foundRestaurant.RestaurantId].Enqueue(order);
+    }
+}
+
 # Feature 6
 //Part 6 - Luanne Lim
 void ProcessOrder(Dictionary<string, Queue<Order>> restaurantOrderQueue,
