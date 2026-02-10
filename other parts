@@ -1,3 +1,48 @@
+//feature b
+void DisplayTotalOrderAmount(List<Restaurant> restaurantList)
+{
+    double grandRefund = 0;
+    double gruberooTotal = 0;
+
+    Console.WriteLine("Total Order Amount Per Restaurant");
+    Console.WriteLine("================================\n");
+
+    foreach (Restaurant restaurant in restaurantList)
+    {
+        double restaurantTotal = 0; // 70% to restaurant
+        double restaurantRefund = 0;
+
+        foreach (Order order in restaurant.orderList)
+        {
+            if (order.OrderStatus.ToLower() == "delivered")
+            {
+                double orderAmount = order.OrderTotal - 5; // subtract delivery fee
+
+                double restaurantShare = orderAmount * 0.7;
+                double gruberooShare = orderAmount * 0.3;
+
+                restaurantTotal += restaurantShare;
+                gruberooTotal += gruberooShare;
+            }
+            else if (order.OrderStatus.ToLower() == "refunded")
+            {
+                restaurantRefund += order.OrderTotal;
+            }
+        }
+
+        Console.WriteLine($"Restaurant: {restaurant.RestaurantName}");
+        Console.WriteLine($"Total order amount (to restaurant): ${restaurantTotal:0.00}");
+        Console.WriteLine($"Total refunds: ${restaurantRefund:0.00}\n");
+
+        grandRefund += restaurantRefund;
+    }
+
+    Console.WriteLine("Total Order Amount Summary");
+    Console.WriteLine("==========================");
+    Console.WriteLine($"Total Overall Refunds: ${grandRefund:0.00}");
+    Console.WriteLine($"Final Amount Gruberoo earns: ${gruberooTotal:0.00}");
+}
+
 // put before main menu
 void SaveQueueToFile(Dictionary<string, Queue<Order>> restaurantOrderQueue)
 {
