@@ -537,3 +537,88 @@ void DeleteExistingOrder(List<Order> orderList, List<OrderedFoodItem> orderedFoo
     }
 }
 //DeleteExistingOrder(orderList, orderfooditemList);
+
+
+
+// Question2 (Load files for Customers and Objects) -Charmaine
+// load the customers.csv file and create customeer objects based on the data loaded
+using (StreamReader sr = new StreamReader("customers.csv"))
+{
+    string? s = sr.ReadLine(); // read the heading line
+    if (s != null)
+    {
+        string[] heading = s.Split(','); // displayb the headings
+        //Console.WriteLine("{0,-16},{1,-16}", heading[0], heading[1]);
+    }
+    while ((s = sr.ReadLine()) != null)
+    {
+        string[] customerData = s.Split(',');
+        string emailAddress = customerData[1];
+        string customerName = customerData[0];
+        Customer customer = new Customer(emailAddress, customerName);
+        customerList.Add(customer);
+
+        //Console.WriteLine(customer); // test output
+    }
+}
+// load the orders.csv file and create order objects based on the data loaded
+using (StreamReader sr = new StreamReader("orders.csv"))
+{
+    string? s = sr.ReadLine(); // skip header
+    while ((s = sr.ReadLine()) != null)
+    {
+        string[] orderData = s.Split(',');
+
+        int orderId = Convert.ToInt32(orderData[0]);
+        string customerEmail = orderData[1].Trim();
+        string restaurantId = orderData[2].Trim();
+        DateTime deliveryDateTime = Convert.ToDateTime(orderData[3] + " " + orderData[4]);
+
+        string deliveryAddress = orderData[5].Trim();
+        DateTime orderDateTime = Convert.ToDateTime(orderData[6]);
+        double totalAmount = Convert.ToDouble(orderData[7]);
+        string status = orderData[8].Trim();
+
+        // Find customer manually
+        Customer foundCustomer = null;
+        foreach (Customer c in customerList)
+        {
+            if (c.EmailAddress.Trim().ToLower() == orderData[1].Trim().ToLower())
+            {
+                foundCustomer = c;
+                break;
+            }
+        }
+
+        if (foundCustomer == null)
+        {
+            Console.WriteLine("Customer not found.");
+            continue;
+        }
+
+        // Find restaurant manually
+        Restaurant foundRestaurant = null;
+        foreach (Restaurant r in restaurantList)
+        {
+            if (r.RestaurantId.Trim().ToLower() == orderData[2].Trim().ToLower())
+            {
+                foundRestaurant = r;
+                break;
+            }
+        }
+
+        if (foundRestaurant == null)
+        {
+            Console.WriteLine("Restaurant not found.");
+            continue;
+        }
+
+        Order order = new Order(orderId, orderDateTime, totalAmount, status, deliveryDateTime, deliveryAddress, "Credit Card", true, foundCustomer, foundRestaurant);
+        orderList.Add(order);
+        // add order to customer's order list
+        foundCustomer.orderList.Add(order);
+        // add order to restaurant's order queue
+        restaurantOrderQueue[foundRestaurant.RestaurantId].Enqueue(order);
+        //Console.WriteLine(order); // test output
+    }
+}
