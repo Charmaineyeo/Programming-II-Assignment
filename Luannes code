@@ -1,138 +1,181 @@
 //process order
-void ProcessOrder(Dictionary<string, Queue<Order>> restaurantOrderQueue,
-                      List<Order> orderList,
-                      Stack<Order> refundStack,
-                      List<OrderedFoodItem> orderedFoodList)
-    {
-        Console.WriteLine("Process Order");
-        Console.WriteLine("===========");
+   //Part 6 - Luanne Lim
+   void ProcessOrder(Dictionary<string, Queue<Order>> restaurantOrderQueue,
+                     List<Order> orderList,
+                     Stack<Order> refundStack,
+                     List<OrderedFoodItem> orderedFoodList)
+   {
+       Console.WriteLine("Process Order");
+       Console.WriteLine("===========");
 
-        while (true)
-        {
-            Console.Write("Enter Restaurant ID (or X to exit): ");
-            string inputRestaurantID = Console.ReadLine();
+       while (true)
+       {
+           Console.Write("Enter Restaurant ID (or X to exit): ");
+           string inputRestaurantID = Console.ReadLine();
 
-            if (inputRestaurantID.ToLower() == "x")
-                break;
+           if (inputRestaurantID.ToLower() == "x")
+               break;
 
-            // Check if restaurant exists
-            if (!restaurantOrderQueue.ContainsKey(inputRestaurantID))
-            {
-                Console.WriteLine("Invalid Restaurant ID.\n");
-                continue;
-            }
+           // Check if restaurant exists
+           if (!restaurantOrderQueue.ContainsKey(inputRestaurantID))
+           {
+               Console.WriteLine("Invalid Restaurant ID.\n");
+               continue;
+           }
 
-            Queue<Order> orderQueue = restaurantOrderQueue[inputRestaurantID];
+           Queue<Order> orderQueue = restaurantOrderQueue[inputRestaurantID];
 
-            if (orderQueue.Count == 0)
-            {
-                Console.WriteLine("No orders for this restaurant.\n");
-                continue;
-            }
+           if (orderQueue.Count == 0)
+           {
+               Console.WriteLine("No orders for this restaurant.\n");
+               continue;
+           }
 
-            // Process orders one by one
-            while (orderQueue.Count > 0)
-            {
-                Order detail = orderQueue.Peek(); // Just peek, don't dequeue yet!
+           // Process orders one by one
+           while (orderQueue.Count > 0)
+           {
+               Order detail = orderQueue.Peek(); // Just peek, don't dequeue yet!
 
-                // Display order details - MATCH EXACT FORMAT
-                Console.WriteLine($"\nOrder {detail.OrderId}:"); // <-- Colon after Order ID
-                Console.WriteLine($"Customer: {detail.Ordercustomer.CustomerName}");
-                Console.WriteLine("Ordered Items:");
+               // Display order details - MATCH EXACT FORMAT
+               Console.WriteLine($"\nOrder {detail.OrderId}:"); // <-- Colon after Order ID
+               Console.WriteLine($"Customer: {detail.Ordercustomer.CustomerName}");
+               Console.WriteLine("Ordered Items:");
 
-                if (detail.orderfooditemList == null || detail.orderfooditemList.Count == 0)
-                {
-                    Console.WriteLine("No items in this order.");
-                }
-                else
-                {
-                    int itemNum = 1;
-                    foreach (var item in detail.orderfooditemList)
-                    {
-                        Console.WriteLine($"{itemNum}. {item.ItemName} - {item.QtyOrdered}"); // <-- Exact format
-                        itemNum++;
-                    }
-                }
+               if (detail.orderfooditemList == null || detail.orderfooditemList.Count == 0)
+               {
+                   Console.WriteLine("No items in this order.");
+               }
+               else
+               {
+                   int itemNum = 1;
+                   foreach (var item in detail.orderfooditemList)
+                   {
+                       Console.WriteLine($"{itemNum}. {item.ItemName} - {item.QtyOrdered}"); // <-- Exact format
+                       itemNum++;
+                   }
+               }
 
-                // Display order total and status - MATCH EXACT FORMAT
-                Console.WriteLine($"Delivery date/time: {detail.DeliveryDateTime:dd/MM/yyyy HH:mm}"); // <-- lowercase "date/time"
-                Console.WriteLine($"Total Amount: ${detail.CalculateOrderTotal():F2}");
-                Console.WriteLine($"Order Status: {detail.OrderStatus}\n");
+               // Display order total and status - MATCH EXACT FORMAT
+               Console.WriteLine($"Delivery date/time: {detail.DeliveryDateTime:dd/MM/yyyy HH:mm}"); // <-- lowercase "date/time"
+               Console.WriteLine($"Total Amount: ${detail.CalculateOrderTotal():F2}");
+               Console.WriteLine($"Order Status: {detail.OrderStatus}\n");
 
-                // Show options - FIXED: Added [O] option
-                Console.Write("[C]onfirm / [R]eject / [S]kip / [D]eliver: ");
-                string choice = Console.ReadLine().ToLower();
+           // If status is already "Delivered" or "Cancelled", skip it automatically
+           if (detail.OrderStatus == "Delivered" || detail.OrderStatus == "Cancelled")
+           {
+               Console.WriteLine($"Order {detail.OrderId} is already {detail.OrderStatus}. Removing from queue.");
+               orderQueue.Dequeue(); // Remove and don't put back
+               Console.WriteLine("\n");
+               continue; // Skip to next order
+           }
 
-            // Remove current order first
-            orderQueue.Dequeue();
+           // Show options only for orders that need processing
+           Console.Write("[C]onfirm / [R]eject / [S]kip / [D]eliver: ");
+           string choice = Console.ReadLine().ToLower();
 
-            if (choice == "c") // Confirm
-            {
-                if (detail.OrderStatus == "Pending")
-                {
-                    detail.OrderStatus = "Preparing";  // Rubric: Pending → Preparing
-                    Console.WriteLine($"Order {detail.OrderId} confirmed. Status: {detail.OrderStatus}");
-                    orderQueue.Enqueue(detail);  // Put back in queue for next step
-                }
-                else
-                {
-                    Console.WriteLine($"Order {detail.OrderId} cannot be confirmed. Current status: {detail.OrderStatus}");
-                    orderQueue.Enqueue(detail);  // Put back in queue
-                }
-            }
-            else if (choice == "r") // Reject
-            {
-                if (detail.OrderStatus == "Pending")
-                {
-                    detail.OrderStatus = "Rejected";  // Rubric: Should be "Rejected", not "Cancelled"
-                    refundStack.Push(detail);
-                    Console.WriteLine($"Order {detail.OrderId} rejected. Status: {detail.OrderStatus}");
-                    Console.WriteLine($"Order {detail.OrderId} added to refund stack.");
-                    // Do NOT enqueue - rejected orders stay out of the processing queue
-                }
-                else
-                {
-                    Console.WriteLine("Only pending orders can be rejected.");
-                    orderQueue.Enqueue(detail);  // Put back in queue
-                }
-            }
-            else if (choice == "s") // Skip
-            {
-                if (detail.OrderStatus == "Cancelled")  // Rubric: Check for "Cancelled" status
-                {
-                    Console.WriteLine($"Order {detail.OrderId} is cancelled. Skipping to next order.");
-                    // Don't enqueue cancelled orders back to processing queue
-                }
-                else
-                {
-                    Console.WriteLine($"Order {detail.OrderId} skipped. Status: {detail.OrderStatus}");
-                    orderQueue.Enqueue(detail);  // Put back in queue
-                }
-            }
-            else if (choice == "d") // Deliver
-            {
-                if (detail.OrderStatus == "Preparing")  // Rubric: Check for "Preparing" status
-                {
-                    detail.OrderStatus = "Delivered";
-                    Console.WriteLine($"Order {detail.OrderId} delivered. Status: {detail.OrderStatus}");
-                    // Do NOT enqueue - delivered orders stay out of the processing queue
-                }
-                else
-                {
-                    Console.WriteLine($"Order is not ready for delivery. Current status: {detail.OrderStatus}");
-                    orderQueue.Enqueue(detail);  // Put back in queue
-                }
-            }
-            else
-            {
-                Console.WriteLine("Invalid choice.");
-                orderQueue.Enqueue(detail);  // Put back in queue for retry
-            }
+           // Remove from queue since we're processing it
+           orderQueue.Dequeue();
 
-            Console.WriteLine("\n");
-        }
-        }
- }
+           if (choice == "c") // Confirm
+           {
+               if (detail.OrderStatus == "Pending")
+               {
+                   detail.OrderStatus = "Confirmed";
+                   Console.WriteLine($"Order {detail.OrderId} confirmed. Status: {detail.OrderStatus}");
+                   orderQueue.Enqueue(detail);
+               }
+               else if (detail.OrderStatus == "Confirmed")
+               {
+                   detail.OrderStatus = "Preparing";
+                   Console.WriteLine($"Order {detail.OrderId} preparing. Status: {detail.OrderStatus}");
+                   orderQueue.Enqueue(detail);
+               }
+               else if (detail.OrderStatus == "Preparing")
+               {
+                   detail.OrderStatus = "Out for Delivery";
+                   Console.WriteLine($"Order {detail.OrderId} out for delivery. Status: {detail.OrderStatus}");
+                   orderQueue.Enqueue(detail);
+               }
+               else if (detail.OrderStatus == "Out for Delivery")
+               {
+                   // Already out for delivery - can't confirm further
+                   Console.WriteLine($"Order {detail.OrderId} is already out for delivery. Use [D] to deliver.");
+                   orderQueue.Enqueue(detail);
+               }
+               else if (detail.OrderStatus == "Delivered")
+               {
+                   // This shouldn't happen if we have the check above
+                   Console.WriteLine($"Order {detail.OrderId} is already delivered. No further action needed.");
+                   // Don't enqueue - delivered orders stay out
+               }
+               else
+               {
+                   Console.WriteLine($"Order {detail.OrderId} cannot be confirmed. Current status: {detail.OrderStatus}");
+                   orderQueue.Enqueue(detail);
+               }
+           }
+           else if (choice == "d") // Deliver
+           {
+               if (detail.OrderStatus == "Out for Delivery")
+               {
+                   detail.OrderStatus = "Delivered";
+                   Console.WriteLine($"Order {detail.OrderId} delivered. Status: {detail.OrderStatus}");
+                   // Do NOT enqueue - delivered orders are done
+               }
+               else if (detail.OrderStatus == "Preparing")
+               {
+                   detail.OrderStatus = "Out for Delivery";
+                   Console.WriteLine($"Order {detail.OrderId} out for delivery. Status: {detail.OrderStatus}");
+                   orderQueue.Enqueue(detail);
+               }
+               else if (detail.OrderStatus == "Delivered")
+               {
+                   // Already delivered
+                   Console.WriteLine($"Order {detail.OrderId} is already delivered.");
+                   // Don't enqueue
+               }
+               else
+               {
+                   Console.WriteLine($"Order {detail.OrderId} is not out for delivery. Current status: {detail.OrderStatus}");
+                   orderQueue.Enqueue(detail);
+               }
+           }
+           else if (choice == "r") // Reject
+           {
+               if (detail.OrderStatus == "Pending")
+               {
+                   detail.OrderStatus = "Cancelled";
+                   refundStack.Push(detail);
+                   Console.WriteLine($"Order {detail.OrderId} cancelled. Status: {detail.OrderStatus}");
+                   Console.WriteLine($"Order {detail.OrderId} added to refund stack.");
+                   // Do NOT enqueue - cancelled orders stay out
+               }
+               else if (detail.OrderStatus == "Delivered" || detail.OrderStatus == "Cancelled")
+               {
+                   Console.WriteLine($"Order {detail.OrderId} is already {detail.OrderStatus}. Cannot reject.");
+                   // Don't enqueue
+               }
+               else
+               {
+                   Console.WriteLine("Only pending orders can be rejected.");
+                   orderQueue.Enqueue(detail);
+               }
+           }
+           else if (choice == "s") // Skip
+           {
+               Console.WriteLine($"Order {detail.OrderId} skipped. Status: {detail.OrderStatus}");
+               orderQueue.Enqueue(detail);  // Put back in queue without changing status
+           }
+           else
+           {
+               Console.WriteLine("Invalid choice.");
+               orderQueue.Enqueue(detail);  // Put back in queue for retry
+           }
+
+           Console.WriteLine("\n");
+       }
+       }
+}
 
 
 //==========================================================
