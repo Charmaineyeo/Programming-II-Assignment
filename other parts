@@ -92,7 +92,16 @@ void mainprogram()
         {
             Console.Write("Enter Customer Email: ");
             string email = Console.ReadLine().Trim().ToLower();
-            Customer cust = customerList.FirstOrDefault(c => c.EmailAddress.ToLower() == email);
+
+            Customer cust = null;
+            foreach (Customer c in customerList)
+            {
+                if (c.EmailAddress.ToLower() == email)
+                {
+                    cust = c;
+                    break;
+                }
+            }
 
             if (cust != null)
                 ShowFavoriteOrders(cust);
@@ -101,4 +110,5 @@ void mainprogram()
         }
     }
 }
+
 mainprogram();
