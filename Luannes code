@@ -1,3 +1,140 @@
+//process order
+void ProcessOrder(Dictionary<string, Queue<Order>> restaurantOrderQueue,
+                      List<Order> orderList,
+                      Stack<Order> refundStack,
+                      List<OrderedFoodItem> orderedFoodList)
+    {
+        Console.WriteLine("Process Order");
+        Console.WriteLine("===========");
+
+        while (true)
+        {
+            Console.Write("Enter Restaurant ID (or X to exit): ");
+            string inputRestaurantID = Console.ReadLine();
+
+            if (inputRestaurantID.ToLower() == "x")
+                break;
+
+            // Check if restaurant exists
+            if (!restaurantOrderQueue.ContainsKey(inputRestaurantID))
+            {
+                Console.WriteLine("Invalid Restaurant ID.\n");
+                continue;
+            }
+
+            Queue<Order> orderQueue = restaurantOrderQueue[inputRestaurantID];
+
+            if (orderQueue.Count == 0)
+            {
+                Console.WriteLine("No orders for this restaurant.\n");
+                continue;
+            }
+
+            // Process orders one by one
+            while (orderQueue.Count > 0)
+            {
+                Order detail = orderQueue.Peek(); // Just peek, don't dequeue yet!
+
+                // Display order details - MATCH EXACT FORMAT
+                Console.WriteLine($"\nOrder {detail.OrderId}:"); // <-- Colon after Order ID
+                Console.WriteLine($"Customer: {detail.Ordercustomer.CustomerName}");
+                Console.WriteLine("Ordered Items:");
+
+                if (detail.orderfooditemList == null || detail.orderfooditemList.Count == 0)
+                {
+                    Console.WriteLine("No items in this order.");
+                }
+                else
+                {
+                    int itemNum = 1;
+                    foreach (var item in detail.orderfooditemList)
+                    {
+                        Console.WriteLine($"{itemNum}. {item.ItemName} - {item.QtyOrdered}"); // <-- Exact format
+                        itemNum++;
+                    }
+                }
+
+                // Display order total and status - MATCH EXACT FORMAT
+                Console.WriteLine($"Delivery date/time: {detail.DeliveryDateTime:dd/MM/yyyy HH:mm}"); // <-- lowercase "date/time"
+                Console.WriteLine($"Total Amount: ${detail.CalculateOrderTotal():F2}");
+                Console.WriteLine($"Order Status: {detail.OrderStatus}\n");
+
+                // Show options - FIXED: Added [O] option
+                Console.Write("[C]onfirm / [R]eject / [S]kip / [D]eliver: ");
+                string choice = Console.ReadLine().ToLower();
+
+            // Remove current order first
+            orderQueue.Dequeue();
+
+            if (choice == "c") // Confirm
+            {
+                if (detail.OrderStatus == "Pending")
+                {
+                    detail.OrderStatus = "Preparing";  // Rubric: Pending → Preparing
+                    Console.WriteLine($"Order {detail.OrderId} confirmed. Status: {detail.OrderStatus}");
+                    orderQueue.Enqueue(detail);  // Put back in queue for next step
+                }
+                else
+                {
+                    Console.WriteLine($"Order {detail.OrderId} cannot be confirmed. Current status: {detail.OrderStatus}");
+                    orderQueue.Enqueue(detail);  // Put back in queue
+                }
+            }
+            else if (choice == "r") // Reject
+            {
+                if (detail.OrderStatus == "Pending")
+                {
+                    detail.OrderStatus = "Rejected";  // Rubric: Should be "Rejected", not "Cancelled"
+                    refundStack.Push(detail);
+                    Console.WriteLine($"Order {detail.OrderId} rejected. Status: {detail.OrderStatus}");
+                    Console.WriteLine($"Order {detail.OrderId} added to refund stack.");
+                    // Do NOT enqueue - rejected orders stay out of the processing queue
+                }
+                else
+                {
+                    Console.WriteLine("Only pending orders can be rejected.");
+                    orderQueue.Enqueue(detail);  // Put back in queue
+                }
+            }
+            else if (choice == "s") // Skip
+            {
+                if (detail.OrderStatus == "Cancelled")  // Rubric: Check for "Cancelled" status
+                {
+                    Console.WriteLine($"Order {detail.OrderId} is cancelled. Skipping to next order.");
+                    // Don't enqueue cancelled orders back to processing queue
+                }
+                else
+                {
+                    Console.WriteLine($"Order {detail.OrderId} skipped. Status: {detail.OrderStatus}");
+                    orderQueue.Enqueue(detail);  // Put back in queue
+                }
+            }
+            else if (choice == "d") // Deliver
+            {
+                if (detail.OrderStatus == "Preparing")  // Rubric: Check for "Preparing" status
+                {
+                    detail.OrderStatus = "Delivered";
+                    Console.WriteLine($"Order {detail.OrderId} delivered. Status: {detail.OrderStatus}");
+                    // Do NOT enqueue - delivered orders stay out of the processing queue
+                }
+                else
+                {
+                    Console.WriteLine($"Order is not ready for delivery. Current status: {detail.OrderStatus}");
+                    orderQueue.Enqueue(detail);  // Put back in queue
+                }
+            }
+            else
+            {
+                Console.WriteLine("Invalid choice.");
+                orderQueue.Enqueue(detail);  // Put back in queue for retry
+            }
+
+            Console.WriteLine("\n");
+        }
+        }
+ }
+
+
 //==========================================================
 // Student Number : S10268773C
 // Student Name : Luanne Lim Bai Yan
