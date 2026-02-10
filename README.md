@@ -1,3 +1,154 @@
+# part 6 processing order
+    //Part 6 - Luanne Lim
+    void ProcessOrder(Dictionary<string, Queue<Order>> restaurantOrderQueue,
+                      List<Order> orderList,
+                      Stack<Order> refundStack,
+                      List<OrderedFoodItem> orderedFoodList)
+    {
+        Console.WriteLine("Process Order");
+        Console.WriteLine("===========");
+
+        while (true)
+        {
+            Console.Write("Enter Restaurant ID (or X to exit): ");
+            string inputRestaurantID = Console.ReadLine();
+
+            if (inputRestaurantID.ToLower() == "x")
+                break;
+
+            // Check if restaurant exists
+            if (!restaurantOrderQueue.ContainsKey(inputRestaurantID))
+            {
+                Console.WriteLine("Invalid Restaurant ID.\n");
+                continue;
+            }
+
+            Queue<Order> orderQueue = restaurantOrderQueue[inputRestaurantID];
+
+            if (orderQueue.Count == 0)
+            {
+                Console.WriteLine("No orders for this restaurant.\n");
+                continue;
+            }
+
+            // Process orders one by one
+            while (orderQueue.Count > 0)
+            {
+                Order detail = orderQueue.Peek(); // Just peek, don't dequeue yet!
+
+                // Display order details - MATCH EXACT FORMAT
+                Console.WriteLine($"\nOrder {detail.OrderId}:"); // <-- Colon after Order ID
+                Console.WriteLine($"Customer: {detail.Ordercustomer.CustomerName}");
+                Console.WriteLine("Ordered Items:");
+
+                if (detail.orderfooditemList == null || detail.orderfooditemList.Count == 0)
+                {
+                    Console.WriteLine("No items in this order.");
+                }
+                else
+                {
+                    int itemNum = 1;
+                    foreach (var item in detail.orderfooditemList)
+                    {
+                        Console.WriteLine($"{itemNum}. {item.ItemName} - {item.QtyOrdered}"); // <-- Exact format
+                        itemNum++;
+                    }
+                }
+
+                // Display order total and status - MATCH EXACT FORMAT
+                Console.WriteLine($"Delivery date/time: {detail.DeliveryDateTime:dd/MM/yyyy HH:mm}"); // <-- lowercase "date/time"
+                Console.WriteLine($"Total Amount: ${detail.CalculateOrderTotal():F2}");
+                Console.WriteLine($"Order Status: {detail.OrderStatus}\n");
+
+                // Show options - FIXED: Added [O] option
+                Console.Write("[C]onfirm / [R]eject / [S]kip / [D]eliver: ");
+                string choice = Console.ReadLine().ToLower();
+
+            // Remove current order first
+            orderQueue.Dequeue();
+
+            if (choice == "c") // Confirm
+            {
+                if (detail.OrderStatus == "Pending")
+                {
+                    detail.OrderStatus = "Confirmed";
+                    Console.WriteLine($"Order {detail.OrderId} confirmed. Status: {detail.OrderStatus}");
+                }
+                else if (detail.OrderStatus == "Confirmed")
+                {
+                    detail.OrderStatus = "Preparing";
+                    Console.WriteLine($"Order {detail.OrderId} preparing. Status:  {detail.OrderStatus}");
+                }
+                else if (detail.OrderStatus == "Preparing")
+                {
+                    detail.OrderStatus = "Out for Delivery";
+                    Console.WriteLine($"Order {detail.OrderId} out for delivery. Status: {detail.OrderStatus}");
+                }
+                else
+                {
+                    Console.WriteLine("Cannot confirm at this stage.");
+                    Console.WriteLine($"Order {detail.OrderId} Status: {detail.OrderStatus}");
+                }
+                orderQueue.Enqueue(detail);
+            }
+
+            else if (choice == "d") // Deliver
+            {
+                if (detail.OrderStatus == "Out for Delivery")
+                {
+                    detail.OrderStatus = "Delivered";
+                    Console.WriteLine($"Order {detail.OrderId} delivered. Status {detail.OrderStatus}");
+                }
+                else
+                {
+                    Console.WriteLine("Order is not ready for delivery.");
+                    orderQueue.Enqueue(detail);
+                }
+            }
+
+            else if (choice == "r") // Reject
+            {
+                if (detail.OrderStatus == "Pending")
+                {
+                    detail.OrderStatus = "Cancelled";
+                    refundStack.Push(detail);
+
+                    Console.WriteLine($"Order {detail.OrderId} cancelled.Status {detail.OrderStatus}");
+                }
+                else
+                {
+                    Console.WriteLine("Only pending orders can be rejected.");
+                    orderQueue.Enqueue(detail);
+                }
+            }
+
+            else if (choice == "s") // Skip
+            {
+                Console.WriteLine($"Order {detail.OrderId} skipped.Status {detail.OrderStatus}");
+                orderQueue.Enqueue(detail);
+            }
+
+            else
+            {
+                Console.WriteLine("Invalid choice.");
+                orderQueue.Enqueue(detail);
+            }
+
+            if (detail.OrderStatus != "Delivered" && detail.OrderStatus != "Cancelled")
+            {
+                orderQueue.Enqueue(detail);
+            }
+            else
+            {
+                orderQueue.Dequeue();
+            }
+
+                Console.WriteLine("\n"); // Add spacing for readability
+            }
+        }
+    }
+//ProcessOrder(restaurantOrderQueue, orderList, refundStack, orderfooditemList);
+
 # Reading order csv
 using (StreamReader sr = new StreamReader("orders.csv"))
 {
