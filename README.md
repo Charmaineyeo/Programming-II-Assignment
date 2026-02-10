@@ -1,3 +1,160 @@
+# Feature 6
+//Part 6 - Luanne Lim
+void ProcessOrder(Dictionary<string, Queue<Order>> restaurantOrderQueue,
+                  List<Order> orderList,
+                  Stack<Order> refundStack,
+                  List<OrderedFoodItem> orderedFoodList)
+{
+    Console.WriteLine("Process Order");
+    Console.WriteLine("=============");
+
+    while (true)
+    {
+        Console.Write("Enter Restaurant ID (or X to exit): ");
+        string inputRestaurantID = Console.ReadLine();
+
+        if (inputRestaurantID.ToLower() == "x")
+            break;
+
+        // Check if restaurant exists
+        if (!restaurantOrderQueue.ContainsKey(inputRestaurantID))
+        {
+            Console.WriteLine("Invalid Restaurant ID.\n");
+            continue;
+        }
+
+        Queue<Order> orderQueue = restaurantOrderQueue[inputRestaurantID];
+
+        if (orderQueue.Count == 0)
+        {
+            Console.WriteLine("No orders for this restaurant.\n");
+            continue;
+        }
+
+        // Process orders one by one
+        while (orderQueue.Count > 0)
+        {
+            Order detail = orderQueue.Peek(); // Just peek, don't dequeue yet!
+
+            // Display order details
+            Console.WriteLine($"\nOrder ID: {detail.OrderId}");
+            Console.WriteLine($"Customer: {detail.Ordercustomer.CustomerName}");
+            Console.WriteLine("Ordered Items:");
+
+            if (detail.orderfooditemList == null || detail.orderfooditemList.Count == 0)
+            {
+                Console.WriteLine("No items in this order.");
+            }
+            else
+            {
+                int itemNum = 1;
+                foreach (var item in detail.orderfooditemList)
+                {
+                    Console.WriteLine($"{itemNum}. {item.ItemName} - {item.QtyOrdered}");
+                    itemNum++;
+                }
+            }
+
+            // Display order total and status
+            Console.WriteLine($"Total Amount: ${detail.CalculateOrderTotal():F2}");
+            Console.WriteLine($"Delivery Date/Time: {detail.DeliveryDateTime: dd/MM/yyyy HH:mm}");
+            Console.WriteLine($"Order Status: {detail.OrderStatus}");
+
+            // Show options - FIXED: Added [O] option
+            Console.Write("[C]onfirm / [R]eject / [O]ut for Delivery / [D]eliver / [S]kip: ");
+            string choice = Console.ReadLine().ToLower();
+
+            // Handle choice
+            if (choice == "c")
+            {
+                if (detail.OrderStatus == "Pending")
+                {
+                    detail.OrderStatus = "Preparing";
+                    Console.WriteLine($"Order {detail.OrderId} confirmed. Status: {detail.OrderStatus}");
+                    // Remove from queue and add to the end
+                    orderQueue.Dequeue(); // Remove the peeked order
+                    orderQueue.Enqueue(detail); // Add it back with updated status
+                }
+                else
+                {
+                    Console.WriteLine($"Order {detail.OrderId} cannot be confirmed. Order brought back to the queue. Status: {detail.OrderStatus}");
+                    // Cycle the order
+                    orderQueue.Dequeue();
+                    orderQueue.Enqueue(detail);
+                }
+            }
+            else if (choice == "r")
+            {
+                if (detail.OrderStatus == "Pending")
+                {
+                    detail.OrderStatus = "Cancelled";
+                    Console.WriteLine($"Order {detail.OrderId} rejected. Status: {detail.OrderStatus}");
+                    refundStack.Push(detail); // Transfers to refund stack
+                    orderQueue.Dequeue(); // Removed from order queue
+                }
+                else
+                {
+                    Console.WriteLine($"Order {detail.OrderId} cannot be rejected. Order brought back to the queue. Status: {detail.OrderStatus}");
+                    // Cycle the order
+                    orderQueue.Dequeue();
+                    orderQueue.Enqueue(detail);
+                }
+            }
+            else if (choice == "o") // This was missing in your original options display
+            {
+                if (detail.OrderStatus == "Preparing")
+                {
+                    detail.OrderStatus = "Out for Delivery";
+                    Console.WriteLine($"Order {detail.OrderId} is out for delivery. Status: {detail.OrderStatus}");
+                    // Cycle the order
+                    orderQueue.Dequeue();
+                    orderQueue.Enqueue(detail);
+                }
+                else
+                {
+                    Console.WriteLine($"Order {detail.OrderId} cannot be out for delivery. Order brought back to the queue. Status: {detail.OrderStatus}");
+                    // Cycle the order
+                    orderQueue.Dequeue();
+                    orderQueue.Enqueue(detail);
+                }
+            }
+            else if (choice == "d")
+            {
+                if (detail.OrderStatus == "Out for Delivery")
+                {
+                    detail.OrderStatus = "Delivered";
+                    Console.WriteLine($"Order {detail.OrderId} delivered. Status: {detail.OrderStatus}");
+                    orderQueue.Dequeue(); // Completely remove since delivered
+                }
+                else
+                {
+                    Console.WriteLine($"Order {detail.OrderId} cannot be delivered. Order brought back to the queue. Status: {detail.OrderStatus}");
+                    // Cycle the order
+                    orderQueue.Dequeue();
+                    orderQueue.Enqueue(detail);
+                }
+            }
+            else if (choice == "s")
+            {
+                Console.WriteLine($"Order {detail.OrderId} skipped.");
+                // Just cycle the order without changing status
+                orderQueue.Dequeue();
+                orderQueue.Enqueue(detail);
+            }
+            else
+            {
+                Console.WriteLine("Invalid choice. Order returned to queue.");
+                // Cycle the order on invalid input
+                orderQueue.Dequeue();
+                orderQueue.Enqueue(detail);
+            }
+
+            Console.WriteLine(); // Add spacing for readability
+        }
+    }
+}
+ProcessOrder(restaurantOrderQueue, orderList, refundStack, orderfooditemList);
+
 # Classes
 ## Restuarant class:
 namespace ASG_pt1
