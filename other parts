@@ -1,0 +1,119 @@
+// put before main menu
+void SaveQueueToFile(Dictionary<string, Queue<Order>> restaurantOrderQueue)
+{
+    using (StreamWriter sw = new StreamWriter("queue.csv"))
+    {
+        // Write header
+        sw.WriteLine("RestaurantID,OrderID,CustomerName,OrderStatus,OrderTotal,DeliveryDateTime");
+        
+        foreach (var kvp in restaurantOrderQueue)
+        {
+            string restaurantID = kvp.Key;
+            Queue<Order> orderQueue = kvp.Value;
+            
+            foreach (Order order in orderQueue)
+            {
+                sw.WriteLine($"{restaurantID},{order.OrderId},{order.Ordercustomer.CustomerName}," +
+                           $"{order.OrderStatus},{order.OrderTotal:F2},{order.DeliveryDateTime:yyyy-MM-dd HH:mm}");
+            }
+        }
+    }
+    Console.WriteLine("Queue data saved to queue.csv");
+}
+
+void SaveStackToFile(Stack<Order> refundStack)
+{
+    using (StreamWriter sw = new StreamWriter("stack.csv"))
+    {
+        // Write header
+        sw.WriteLine("OrderID,CustomerName,OrderStatus,OrderTotal,DeliveryDateTime,RefundDateTime");
+        
+        // Since Stack is LIFO, we need to preserve order when writing
+        List<Order> tempList = new List<Order>();
+        
+        // Copy stack to list to preserve order
+        foreach (Order order in refundStack)
+        {
+            tempList.Add(order);
+        }
+        
+        // Write in the order they would be processed (last in first out)
+        for (int i = tempList.Count - 1; i >= 0; i--)
+        {
+            Order order = tempList[i];
+            sw.WriteLine($"{order.OrderId},{order.Ordercustomer.CustomerName}," +
+                       $"{order.OrderStatus},{order.OrderTotal:F2}," +
+                       $"{order.DeliveryDateTime:yyyy-MM-dd HH:mm},{DateTime.Now:yyyy-MM-dd HH:mm}");
+        }
+    }
+    Console.WriteLine("Stack data saved to stack.csv");
+}
+
+
+
+\\main menu
+void mainprogram()
+{
+    //Start of Program
+    Console.WriteLine("Welcome to the Gruberoo Food Delivery System \r\n");
+    Console.WriteLine("{0} restuarants loaded!", restaurantList.Count);
+    Console.WriteLine("{0} food items loaded!", foodItemList.Count);
+    Console.WriteLine("{0} customers loaded!", customerList.Count);
+    Console.WriteLine("{0} orders loaded!", orderList.Count);
+    Console.WriteLine("\n");
+    //Main Program
+    while (true)
+    {
+        Console.WriteLine("===== Gruberoo Food Delivery System ===== ");
+        Console.WriteLine("1. List all restaurants and menu items");
+        Console.WriteLine("2. List all orders ");
+        Console.WriteLine("3. Create a new order ");
+        Console.WriteLine("4. Process an order ");
+        Console.WriteLine("5. Modify an existing order");
+        Console.WriteLine("6. Delete an existing order");
+        Console.WriteLine("7. Bulk Processing of Unprocessed Orders");
+        Console.WriteLine("0. Exit");
+        Console.Write("Enter your choice: ");
+        int userAnswer = Convert.ToInt32(Console.ReadLine());
+
+        if (userAnswer == 0)
+        {
+            //When exit is chosen, the information in the queue and stack are saved to new files queue.csv and stack.csv respectively. 
+            // Save data to files before exiting
+            Console.WriteLine("\nSaving data...");
+            SaveQueueToFile(restaurantOrderQueue);
+            SaveStackToFile(refundStack);
+            Console.WriteLine("Thank you for using Gruberoo Food Delivery System!");
+            break;
+        }
+        else if (userAnswer == 1)
+        {
+            ListAllRestaurantsAndMenuItems(restaurantList);
+        }
+        else if (userAnswer == 2)
+        {
+            DisplayallOrders(orderList);
+        }
+        else if (userAnswer == 3)
+        {
+            CreateNewOrder();
+        }
+        else if (userAnswer == 4)
+        {
+            ProcessOrder(restaurantOrderQueue, orderList, refundStack, orderfooditemList);
+        }
+        else if (userAnswer == 5)
+        {
+            ModifyOrder(customerList, restaurantAssignDict);
+        }
+        else if (userAnswer == 6)
+        {
+            DeleteExistingOrder(orderList, orderfooditemList);
+        }
+        else if (userAnswer == 7)
+        {
+            BulkProcessing(orderList);
+        }
+    }
+}
+mainprogram();
